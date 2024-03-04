@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<head>
+    <link href="popup.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header-wrapper">
+            <span id="healthStatus" class="header">Health Status @ --:--:--</span>
+        </div>
+        
+        <hr>
+
+        <div class="section">
+            <span class="title">Initalizations</span>
+            
+            <div class="component">
+                <span class="name">Leverages</span>
+                <span id="leverages" class="value">---</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <span class="title">Parsing Health</span>
+            
+            <div class="component">
+                <span class="name">Exchange</span>
+                <span id="exchange" class="value">---</span>
+            </div>
+            <div class="component">
+                <span class="name">Symbol</span>
+                <span id="symbol" class="value">---</span>
+            </div>
+            <div class="component">
+                <span class="name">Top BID</span>
+                <span id="topBid" class="value">---</span>
+            </div>
+            <div class="component">
+                <span class="name">Top ASK</span>
+                <span id="topAsk" class="value">---</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <span class="title">API Health</span>
+            
+            <div class="component">
+                <span class="name">Available Fund</span>
+                <span id="availableFund" class="value">---</span>
+            </div>
+            <div class="component">
+                <span class="name">Net Position</span>
+                <span id="netPosition" class="value">---</span>
+            </div>
+        </div>
+        
+        <div class="button-wrapper"">
+            <button id="refresh">Refresh</button>
+        </div>
+
+        <div>
+            <span id="errorMsg" class="errorMessage"></span>
+        </div>
+    </div>
+</body>
+
+<script src="popup.js"></script>
+</html>

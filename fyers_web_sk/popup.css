@@ -1,0 +1,66 @@
+.container {
+    width: 300px;
+    min-height: 150px;
+    color: #535353;
+}
+
+.header-wrapper {
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.header {
+    font-size: large;
+    font-weight: bold;
+}
+
+.section {
+    padding-bottom: 20px;
+}
+
+.title {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-size: medium;
+    font-weight: bolder;
+    text-decoration: underline;
+    padding-bottom: 10px;
+}
+
+.component {
+    width: 100%;
+    padding-bottom: 25px;
+}
+
+.name {
+    display: block;
+    width: 50%;
+    float: left;
+}
+
+.value {
+    display: block;
+    width: 50%;
+    float: left;
+}
+
+.button-wrapper {
+    text-align: center;
+}
+
+.inactive {
+    height: 150px;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    font-size: larger;
+    font-weight: bold;
+}
+
+.errorMessage {
+    display: none;
+    padding-top: 15px;
+    color: red;
+}
