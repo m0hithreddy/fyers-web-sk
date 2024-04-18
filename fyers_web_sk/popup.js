@@ -12,16 +12,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.getElementById("refresh").addEventListener("click", refresh);
 
 async function refresh() {
-    const checks = [
+    const metrics = [
         "leverages", "exchange", "symbol", "topBid",
         "topAsk", "availableFund", "netPosition"
     ];
+    const fields = [
+        ...metrics, "breakEvenWindow"
+    ]
     const errorMsg = document.getElementById("errorMsg");
     const healthStatus = document.getElementById("healthStatus");
 
     // Reset the values
-    for (let check of checks) {
-        const element = document.getElementById(check);
+    for (let field of fields) {
+        const element = document.getElementById(field);
         element.innerHTML = "---";
     }
     errorMsg.style.display = "none";
@@ -34,13 +37,24 @@ async function refresh() {
     
     // Stat the health data and populate corresponding fields.
     const response = await chrome.tabs.sendMessage((await getCurrentTab()).id, {
-        type: "health-check"
+        type: "health-metrics"
     });
     if (response.status === "ok") {
-        for (let check of checks) {
-            const element = document.getElementById(check);
-            element.innerHTML = response.data[check];
+        let metricsData = response.data;
+        for (let metric of metrics) {
+            const element = document.getElementById(metric);
+            element.innerHTML = metricsData[metric];
         }
+
+        // Calculations
+
+        // Break Even Window - Profits gone for charges (Round near to multiple's of 0.05)
+        const breakEvenWindow = document.getElementById("breakEvenWindow");
+
+        const windowLow = Math.floor(Math.floor(metricsData["topAsk"] * 0.9975 * 100) / 5) * 5 / 100
+        const windowHigh = Math.ceil(Math.floor(metricsData["topBid"] * 1.0025 * 100) / 5) * 5 / 100
+
+        breakEvenWindow.innerHTML = `${windowLow} <=> ${windowHigh}`
 
         healthStatus.innerHTML = `Health Status @ ${response.data.atTime}`
     } else {

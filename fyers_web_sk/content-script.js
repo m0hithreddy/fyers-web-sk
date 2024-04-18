@@ -53,7 +53,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             } catch(err) {
                 alert(err.message)
             }
-        } else if (message.type === "health-check") {
+        } else if (message.type === "health-metrics") {
             try {
                 const [exchange, symbol] = getExchangeSymbol();
                 const leverages_date = (await chrome.storage.local.get(["leverages"]))?.leverages?.for_date;
