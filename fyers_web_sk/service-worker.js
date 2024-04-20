@@ -1,3 +1,6 @@
+// Load PapaParse library dynamically
+importScripts("libs/papaparse.5.4.1.min.js")
+
 chrome.commands.onCommand.addListener(command => {
     (async () => {
         let tab = await getCurrentTab();
@@ -25,10 +28,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
             return;
         }
     
+        const todayDate = new Date().toLocaleDateString();
+
         // Initalize the leverages. Re-Fetch the leverages, if the date does not match.
         let leverages = (await chrome.storage.local.get(["leverages"])).leverages;
-        const todayDate = new Date().toLocaleDateString();
-    
+        
         if (!leverages || leverages["for_date"] != todayDate) {
             const leveragesRaw = (await (await fetch(
                 "https://public.fyers.in/website/margin-calculator/equity/eq_website_upload.json"
@@ -46,6 +50,34 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     
             // Store the leverages
             await chrome.storage.local.set({"leverages": leverages});
+        }
+
+        // Intialize the tick sizes. Re-Fetch the tick sizes, if the date does not match
+        let tickSizes = (await chrome.storage.local.get(["tickSizes"])).tickSizes;
+
+        if (!tickSizes || tickSizes["for_date"] != todayDate) {
+            const tickSizesRaw = await((await fetch(
+                "https://public.fyers.in/sym_details/NSE_CM.csv"
+            )).text());
+            const tickSizesCsv = Papa.parse(tickSizesRaw).data;
+
+            tickSizes = {
+                "for_date": todayDate,
+                "exchanges_symbols": {}
+            };
+            const exchanges_symbols = tickSizes["exchanges_symbols"];
+
+            for (let row of tickSizesCsv) {
+                if (row[4] == null || row[9] == null) {
+                    continue
+                }
+                
+                const es = row[9].substring(0, row[9].lastIndexOf('-'));
+                exchanges_symbols[es] = parseFloat(row[4]);
+            }
+
+            // Store the tick sizes
+            await chrome.storage.local.set({"tickSizes": tickSizes});
         }
     })();
 

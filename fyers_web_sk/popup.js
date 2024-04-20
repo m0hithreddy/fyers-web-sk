@@ -13,7 +13,7 @@ document.getElementById("refresh").addEventListener("click", refresh);
 
 async function refresh() {
     const metrics = [
-        "leverages", "exchange", "symbol", "topBid",
+        "leverages", "tickSizes", "exchange", "symbol", "tickSize", "topBid",
         "topAsk", "availableFund", "netPosition"
     ];
     const fields = [
@@ -48,11 +48,12 @@ async function refresh() {
 
         // Calculations
 
-        // Break Even Window - Profits gone for charges (Round near to multiple's of 0.05)
+        // Break Even Window - Profits gone for charges (0.25%) - Round near to multiple's of tick size
         const breakEvenWindow = document.getElementById("breakEvenWindow");
+        const tickSize = new Decimal(metricsData["tickSize"])
 
-        const windowLow = Math.floor(Math.floor(metricsData["topAsk"] * 0.9975 * 100) / 5) * 5 / 100
-        const windowHigh = Math.ceil(Math.floor(metricsData["topBid"] * 1.0025 * 100) / 5) * 5 / 100
+        const windowLow = new Decimal(metricsData["topAsk"]).times(new Decimal('0.9975')).dividedBy(tickSize).floor().times(tickSize);
+        const windowHigh = new Decimal(metricsData["topBid"]).times(new Decimal('1.0025')).dividedBy(tickSize).ceil().times(tickSize);
 
         breakEvenWindow.innerHTML = `${windowLow} <=> ${windowHigh}`
 

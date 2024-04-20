@@ -5,6 +5,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 // Get exchange and symbol
                 const [exchange, symbol] = getExchangeSymbol();
         
+                // Get tick size
+                const tick_size = await getTickSize(exchange, symbol);
+
                 // Get current position for exchange:symbol
                 const current_position = await getCurrentPosition(exchange, symbol);
         
@@ -28,7 +31,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     const limit_price = getLimitPrice(side);
 
                     const positionSize = computePositionSize(
-                        leveragedFund, exchange, side, getOrderPrice(limit_price, side, {sell_margin: 0})
+                        leveragedFund, exchange, side, getOrderPrice(limit_price, side, tick_size, 0)
                     );  // Worst case scenario.
 
                     if (positionSize < 1) {
@@ -36,7 +39,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     }
         
                     // Place limit order
-                    const order_price = getOrderPrice(limit_price, side);
+                    const order_price = getOrderPrice(limit_price, side, tick_size, tick_size);
 
                     await placeLimitOrder(exchange, symbol, side,order_price, positionSize);
                 } else {
@@ -46,7 +49,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     const so_quantity = Math.ceil(Math.abs(current_position) * multiplier);
 
                     // Place limit order
-                    const order_price = getOrderPrice(getLimitPrice(side), side);
+                    const order_price = getOrderPrice(getLimitPrice(side), side, tick_size, tick_size);
 
                     await placeLimitOrder(exchange, symbol, side, order_price, so_quantity)
                 }
@@ -57,6 +60,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             try {
                 const [exchange, symbol] = getExchangeSymbol();
                 const leverages_date = (await chrome.storage.local.get(["leverages"]))?.leverages?.for_date;
+                const tickSizes_date = (await chrome.storage.local.get(["tickSizes"]))?.tickSizes?.for_date;
                 
                 if(!leverages_date) {
                     throw new Error("Leverages are not initalized")
@@ -67,8 +71,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     "message": "ok",
                     "data": {
                         "leverages": leverages_date,
+                        "tickSizes": tickSizes_date,
                         "exchange": exchange,
                         "symbol": symbol,
+                        "tickSize": await getTickSize(exchange, symbol),
                         "topBid": getTopBid(),
                         "topAsk": getTopAsk(),
                         "availableFund": await getAvailableFund(),
@@ -220,6 +226,22 @@ async function getLeverage(exchange, symbol){
     }
 }
 
+async function getTickSize(exchange, symbol) {
+    try {
+        const tickSizes = (await chrome.storage.local.get(["tickSizes"])).tickSizes;
+        const exchange_symbol = `${exchange}:${symbol.split("-").slice(0, -1).join("-")}`;
+        const tickSize = tickSizes.exchanges_symbols[exchange_symbol];
+
+        if (!tickSize) {
+            throw "";
+        }
+
+        return tickSize;
+    } catch {
+        throw new Error("Error fetching tick size");
+    }
+}
+
 function getTopBid() {
     const iframe = getIFrameDocument();
 
@@ -264,7 +286,7 @@ function getLimitPrice(side) {
     return side === "buy" ? getTopAsk() : getTopBid();
 }
 
-function getOrderPrice(limit_price, side, {buy_margin=0.05, sell_margin=0.05}={}) {
+function getOrderPrice(limit_price, side, buy_margin, sell_margin) {
     return Math.round(
         (side === "buy" ? limit_price + buy_margin : limit_price - sell_margin) * 100
     ) / 100;

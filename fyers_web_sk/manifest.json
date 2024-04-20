@@ -12,7 +12,7 @@
     "content_scripts": [
         {
             "matches": ["https://*.fyers.in/"],
-            "js": ["content-script.js"]
+            "js": ["content-script.js", "libs/papaparse.5.4.1.min.js", "libs/decimal.10.4.3.min.js"]
         }
     ],
     "background": {
