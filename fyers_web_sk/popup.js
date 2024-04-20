@@ -13,7 +13,7 @@ document.getElementById("refresh").addEventListener("click", refresh);
 
 async function refresh() {
     const metrics = [
-        "leverages", "tickSizes", "exchange", "symbol", "tickSize", "topBid",
+        "leverages", "tickSizes", "exchange", "symbol", "leverage", "tickSize", "topBid",
         "topAsk", "availableFund", "netPosition"
     ];
     const fields = [

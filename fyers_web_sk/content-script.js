@@ -74,6 +74,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                         "tickSizes": tickSizes_date,
                         "exchange": exchange,
                         "symbol": symbol,
+                        "leverage": await getLeverage(exchange, symbol),
                         "tickSize": await getTickSize(exchange, symbol),
                         "topBid": getTopBid(),
                         "topAsk": getTopAsk(),
