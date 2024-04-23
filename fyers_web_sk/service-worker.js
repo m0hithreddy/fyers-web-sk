@@ -72,8 +72,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                     continue
                 }
                 
-                const es = row[9].substring(0, row[9].lastIndexOf('-'));
-                exchanges_symbols[es] = parseFloat(row[4]);
+                exchanges_symbols[row[9]] = parseFloat(row[4]);
             }
 
             // Store the tick sizes

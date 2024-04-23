@@ -133,7 +133,7 @@ async function getLeverage(exchange, symbol){
 async function getTickSize(exchange, symbol) {
     try {
         const tickSizes = (await chrome.storage.local.get(["tickSizes"])).tickSizes;
-        const exchange_symbol = `${exchange}:${symbol.split("-").slice(0, -1).join("-")}`;
+        const exchange_symbol = `${exchange}:${symbol}`;
         const tickSize = tickSizes.exchanges_symbols[exchange_symbol];
 
         if (!tickSize) {
