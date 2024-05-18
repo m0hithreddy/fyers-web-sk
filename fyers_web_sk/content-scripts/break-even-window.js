@@ -43,38 +43,8 @@ function setupBreakEvenWindowPlotting() {
             // setup break even window plotting.
             observer.disconnect();
             
-            const windowHighLines = {};
-            const bidObserver = new MutationObserver(async (records) => {
-                // Parse the bid value
-                let bid;
-                try {
-                    bid = new Decimal(records[records.length - 1].target.textContent.trim());
-                } catch {
-                    return;
-                }
-                
-                // Get exchange and symbol
-                const [exchange, symbol] = getExchangeSymbol();
-                if (!(exchange && symbol)) {
-                    return;
-                }
-                const ticker = `${exchange}:${symbol}`;
-                
-                // Compute window high
-                const tickSize = new Decimal(await getTickSize(exchange, symbol));
-                const windowHigh = bid.times(new Decimal('1.0025')).dividedBy(tickSize).ceil().times(tickSize).toNumber();
-                
-                // Show trading view horizontal line
-                windowHighLines[ticker] = await showTvHl(windowHighLines[ticker], windowHigh);
-            });
-            bidObserver.observe(bidSpan, {
-                subtree: true,
-                characterData: true,
-                childList: true
-            });
-
             // Observe for top ask changes
-            const windowLowLines = {};
+            const windowHighLines = {};
             const askObserver = new MutationObserver(async (records) => {
                 // Parse the ask value
                 let ask;
@@ -91,14 +61,45 @@ function setupBreakEvenWindowPlotting() {
                 }
                 const ticker = `${exchange}:${symbol}`;
 
+                // Compute window high
+                const tickSize = new Decimal(await getTickSize(exchange, symbol));
+                const windowHigh = ask.times(new Decimal('1.0025')).dividedBy(tickSize).ceil().times(tickSize).toNumber();
+
+                // Show trading view horizontal line
+                windowHighLines[ticker] = await showTvHl(windowHighLines[ticker], windowHigh);
+            });
+            askObserver.observe(askSpan, {
+                subtree: true,
+                characterData: true,
+                childList: true
+            });
+            
+            // Observe for top bid changes
+            const windowLowLines = {};
+            const bidObserver = new MutationObserver(async (records) => {
+                // Parse the bid value
+                let bid;
+                try {
+                    bid = new Decimal(records[records.length - 1].target.textContent.trim());
+                } catch {
+                    return;
+                }
+                
+                // Get exchange and symbol
+                const [exchange, symbol] = getExchangeSymbol();
+                if (!(exchange && symbol)) {
+                    return;
+                }
+                const ticker = `${exchange}:${symbol}`;
+                
                 // Compute window low
                 const tickSize = new Decimal(await getTickSize(exchange, symbol));
-                const windowLow = ask.times(new Decimal('0.9975')).dividedBy(tickSize).floor().times(tickSize).toNumber();
-
+                const windowLow = bid.times(new Decimal('0.9975')).dividedBy(tickSize).floor().times(tickSize).toNumber();
+                
                 // Show trading view horizontal line
                 windowLowLines[ticker] = await showTvHl(windowLowLines[ticker], windowLow);
             });
-            askObserver.observe(askSpan, {
+            bidObserver.observe(bidSpan, {
                 subtree: true,
                 characterData: true,
                 childList: true

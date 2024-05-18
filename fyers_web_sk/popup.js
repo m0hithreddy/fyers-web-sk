@@ -52,8 +52,8 @@ async function refresh() {
         const breakEvenWindow = document.getElementById("breakEvenWindow");
         const tickSize = new Decimal(metricsData["tickSize"])
 
-        const windowLow = new Decimal(metricsData["topAsk"]).times(new Decimal('0.9975')).dividedBy(tickSize).floor().times(tickSize);
-        const windowHigh = new Decimal(metricsData["topBid"]).times(new Decimal('1.0025')).dividedBy(tickSize).ceil().times(tickSize);
+        const windowLow = new Decimal(metricsData["topBid"]).times(new Decimal('0.9975')).dividedBy(tickSize).floor().times(tickSize);
+        const windowHigh = new Decimal(metricsData["topAsk"]).times(new Decimal('1.0025')).dividedBy(tickSize).ceil().times(tickSize);
 
         breakEvenWindow.innerHTML = `${windowLow} <=> ${windowHigh}`
 
