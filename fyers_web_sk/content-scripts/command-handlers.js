@@ -41,7 +41,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     // Place limit order
                     const order_price = getOrderPrice(limit_price, side, tick_size, tick_size);
 
-                    await placeLimitOrder(exchange, symbol, side,order_price, positionSize);
+                    await placeLimitOrder(exchange, symbol, side, order_price, positionSize);
                 } else {
                     // Square off
         

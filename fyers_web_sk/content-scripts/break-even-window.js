@@ -115,19 +115,3 @@ function setupBreakEvenWindowPlotting() {
         subtree: true
     });
 }
-
-function showTvHl(lineId, price) {
-    return new Promise((resolve, reject) => {
-        const dynamicEvent = `Fyers_Web_Sk_${uuid.v4()}`;
-
-        function handleTvHlCreateResponse(event) {
-            document.removeEventListener(dynamicEvent, handleTvHlCreateResponse);
-            resolve(event.detail.lineId);
-        }
-
-        document.addEventListener(dynamicEvent, handleTvHlCreateResponse); 
-        document.dispatchEvent(new CustomEvent(
-            "Fyers_Web_Sk_show_tv_hl_request", {detail: {responseEvent: dynamicEvent, lineId: lineId, price: price}}
-        ));
-    });
-}

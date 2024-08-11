@@ -14,7 +14,8 @@
             "matches": ["https://trade.fyers.in/"],
             "js": [
                 "content-scripts/commons.js", "content-scripts/break-even-window.js", "content-scripts/command-handlers.js", 
-                "libs/papaparse.5.4.1.min.js", "libs/decimal.10.4.3.min.js", "libs/uuidv4.8.3.2.min.js"
+                "content-scripts/position-entry-be-sl.js", "libs/papaparse.5.4.1.min.js", "libs/decimal.10.4.3.min.js",
+                "libs/uuidv4.8.3.2.min.js"
             ]
         },
         {

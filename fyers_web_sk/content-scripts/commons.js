@@ -107,6 +107,8 @@ async function placeLimitOrder(exchange, symbol, side, limit_price, quantity) {
         if (!fyers_id) {
             throw "";
         }
+        
+        await markPositionEntryBeSl(exchange, symbol, side, limit_price, quantity);
 
         return fyers_id;
     } catch {
@@ -231,4 +233,52 @@ function computePositionSize(capital, exchange, side, price) {
     } catch {
         throw new Error("Error computing position size");
     }
+}
+
+function showTvHl(lineId, price) {
+    return new Promise((resolve, reject) => {
+        const dynamicEvent = `Fyers_Web_Sk_${uuid.v4()}`;
+
+        function handleTvHlCreateResponse(event) {
+            document.removeEventListener(dynamicEvent, handleTvHlCreateResponse);
+            resolve(event.detail.lineId);
+        }
+
+        document.addEventListener(dynamicEvent, handleTvHlCreateResponse); 
+        document.dispatchEvent(new CustomEvent(
+            "Fyers_Web_Sk_show_tv_hl_request", {detail: {responseEvent: dynamicEvent, lineId: lineId, price: price}}
+        ));
+    });
+}
+
+function deleteTvEntities(entityIds) {
+    return new Promise((resolve, reject) => {
+        const dynamicEvent = `Fyers_Web_Sk_${uuid.v4()}`;
+
+        function handleDeleteTvEntitiesResponse(event) {
+            document.removeEventListener(dynamicEvent, handleDeleteTvEntitiesResponse);
+            resolve(event.detail.result);
+        }
+
+        document.addEventListener(dynamicEvent, handleDeleteTvEntitiesResponse);
+        document.dispatchEvent(new CustomEvent(
+            "Fyers_Web_Sk_delete_tv_entities_request", {detail: {responseEvent: dynamicEvent, forceSave: true, entityIds: entityIds}}
+        ));
+    });
+}
+
+function checkShapesExist(shapeIds) {
+    return new Promise((resolve, reject) => {
+        const dynamicEvent = `Fyers_Web_Sk_${uuid.v4()}`;
+        
+        function handleCheckShapesExistResponse(event) {
+            document.removeEventListener(dynamicEvent, handleCheckShapesExistResponse);
+            resolve(event.detail.result);
+        }
+
+        document.addEventListener(dynamicEvent, handleCheckShapesExistResponse);
+        document.dispatchEvent(new CustomEvent(
+            "Fyers_Web_Sk_check_shapes_exist_request", {detail: {responseEvent: dynamicEvent, shapeIds: shapeIds}}
+        ));
+    })
 }
