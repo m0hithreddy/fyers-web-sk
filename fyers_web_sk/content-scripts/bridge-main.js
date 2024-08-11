@@ -1,3 +1,27 @@
+const setUpCrossHairTracking = setInterval(function() {
+    if (!('tvWidget' in window)) {
+        return;
+    }
+
+    clearInterval(setUpCrossHairTracking);
+    
+    let x = null, y = null;
+    window.tvWidget.activeChart().crossHairMoved().subscribe(
+        null,
+        ({time, price}) => {
+            x = time;
+            y = price;
+        }
+    );
+    
+    document.addEventListener("Fyers_Web_Sk_get_last_crosshair_request", function(event) {
+        document.dispatchEvent(new CustomEvent(
+            event.detail.responseEvent,
+            {detail: {time: x, price: y}}
+        ));
+    });
+}, 1000);
+
 document.addEventListener("Fyers_Web_Sk_show_tv_hl_request", function(event) {
     const eventData = event.detail;
 

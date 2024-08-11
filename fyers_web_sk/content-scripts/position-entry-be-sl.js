@@ -1,6 +1,6 @@
 // Mark Position Entry, Break Even and Stop Loss points
 
-// Poll for any manual shape deletions
+// Poll for any manual marks deletion
 setInterval(async () => {
     let exchange, symbol;
     try {
@@ -35,7 +35,7 @@ setInterval(async () => {
     }
 }, 1000); 
 
-async function markPositionEntryBeSl(exchange, symbol, side, limit_price, quantity) {
+async function managePositionMarks(exchange, symbol, side, limit_price, quantity) {
     let marks = (await chrome.storage.local.get(["positionMarks"])).positionMarks;
     const es = `${exchange}:${symbol}`;
     const curr_time = Math.floor(Date.now() / 1000);
@@ -79,22 +79,22 @@ async function markPositionEntryBeSl(exchange, symbol, side, limit_price, quanti
     }
 
     // Compute position related marks
-    const tick_size = new Decimal(await getTickSize(exchange, symbol));
+    const tick_size = await getTickSize(exchange, symbol);
     const dlp = new Decimal(limit_price);
     var mark_data;
     if (side === "buy") {
         mark_data = {
             'time': curr_time,
             'entry': limit_price,
-            'be': dlp.times(new Decimal('1.0025')).dividedBy(tick_size).ceil().times(tick_size).toNumber(),
-            'sl': dlp.times(new Decimal('0.99')).dividedBy(tick_size).floor().times(tick_size).toNumber()
+            'be': roundToNearest(dlp.times(new Decimal('1.0025')), true, tick_size),
+            'sl': roundToNearest(dlp.times(new Decimal('0.99')), false , tick_size)
         }
     } else {
         mark_data = {
             'time': curr_time,
             'entry': limit_price,
-            'be': dlp.times(new Decimal('0.9975')).dividedBy(tick_size).floor().times(tick_size).toNumber(),
-            'sl': dlp.times(new Decimal('1.01')).dividedBy(tick_size).ceil().times(tick_size).toNumber()
+            'be': roundToNearest(dlp.times(new Decimal('0.9975')), false, tick_size),
+            'sl': roundToNearest(dlp.times(new Decimal('1.01')), true, tick_size)
         }
     }
 

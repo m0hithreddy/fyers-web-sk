@@ -12,7 +12,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 const current_position = await getCurrentPosition(exchange, symbol);
         
                 // Determine whether to add to position or to square off
-                const [side, multiplier] = parseCommand(message.data.command);
+                const [side, multiplier, atLimit] = parseCommand(message.data.command);
         
                 if ((side === "buy" && current_position >= 0) || (side === "sell" && current_position <= 0)) {
                     // Add to position
@@ -27,31 +27,48 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         
                     const leveragedFund = availableFund * (await getLeverage(exchange, symbol))
         
-                    // Compute position size
-                    const limit_price = getLimitPrice(side);
+                    // Compute limit price, position size, order price
+                    let limit_price, position_size, order_price
+                    if (atLimit) {
+                        limit_price = roundToNearest((await getLastCrossHair()).price, side === "buy", tick_size);
 
-                    const positionSize = computePositionSize(
-                        leveragedFund, exchange, side, getOrderPrice(limit_price, side, tick_size, 0)
-                    );  // Worst case scenario.
+                        position_size = computePositionSize(
+                            leveragedFund, exchange, side, limit_price
+                        );
 
-                    if (positionSize < 1) {
+                        order_price = limit_price;
+                    } else {
+                        limit_price = getLimitPrice(side);
+
+                        position_size = computePositionSize(
+                            leveragedFund, exchange, side, getOrderPrice(limit_price, side, tick_size, 0)
+                        );  // Worst case scenario.
+
+                        order_price = getOrderPrice(limit_price, side, tick_size, tick_size);
+                    }
+
+                    if (position_size < 1) {
                         throw new Error("Not enough funds to take the position")
                     }
         
                     // Place limit order
-                    const order_price = getOrderPrice(limit_price, side, tick_size, tick_size);
-
-                    await placeLimitOrder(exchange, symbol, side, order_price, positionSize);
+                    await placeLimitOrder(exchange, symbol, side, order_price, position_size, true);
                 } else {
                     // Square off
         
                     // Compute square off quantity
                     const so_quantity = Math.ceil(Math.abs(current_position) * multiplier);
+                    
+                    // Compute order price
+                    let order_price;
+                    if (atLimit) {
+                        order_price = roundToNearest((await getLastCrossHair()).price, side === "buy", tick_size);
+                    } else {
+                        order_price = getOrderPrice(getLimitPrice(side), side, tick_size, tick_size);
+                    }
 
                     // Place limit order
-                    const order_price = getOrderPrice(getLimitPrice(side), side, tick_size, tick_size);
-
-                    await placeLimitOrder(exchange, symbol, side, order_price, so_quantity)
+                    await placeLimitOrder(exchange, symbol, side, order_price, so_quantity, !atLimit);
                 }
             } catch(err) {
                 alert(err.message)

@@ -62,8 +62,8 @@ function setupBreakEvenWindowPlotting() {
                 const ticker = `${exchange}:${symbol}`;
 
                 // Compute window high
-                const tickSize = new Decimal(await getTickSize(exchange, symbol));
-                const windowHigh = ask.times(new Decimal('1.0025')).dividedBy(tickSize).ceil().times(tickSize).toNumber();
+                const tickSize = await getTickSize(exchange, symbol);
+                const windowHigh = roundToNearest(ask.times(new Decimal('1.0025')), true, tickSize);
 
                 // Show trading view horizontal line
                 windowHighLines[ticker] = await showTvHl(windowHighLines[ticker], windowHigh);
@@ -93,9 +93,9 @@ function setupBreakEvenWindowPlotting() {
                 const ticker = `${exchange}:${symbol}`;
                 
                 // Compute window low
-                const tickSize = new Decimal(await getTickSize(exchange, symbol));
-                const windowLow = bid.times(new Decimal('0.9975')).dividedBy(tickSize).floor().times(tickSize).toNumber();
-                
+                const tickSize = await getTickSize(exchange, symbol);
+                const windowLow = roundToNearest(bid.times(new Decimal('0.9975')), false, tickSize);
+
                 // Show trading view horizontal line
                 windowLowLines[ticker] = await showTvHl(windowLowLines[ticker], windowLow);
             });

@@ -75,12 +75,12 @@ function getCookieValue(name) {
 
 function parseCommand(command) {
     // Split the command into parts
-    const [side, multiplierx] = command.split("-");
+    const [side, multiplierx, atLimit] = command.split("-");
 
-    return [side, parseFloat(multiplierx.split("x", 1)[0])];
+    return [side, parseFloat(multiplierx.split("x", 1)[0]), !!atLimit];
 }
 
-async function placeLimitOrder(exchange, symbol, side, limit_price, quantity) {
+async function placeLimitOrder(exchange, symbol, side, limit_price, quantity, manageMarks) {
     try {
         const fyers_id = (await (await fetch(`${FYERS_API_ROOT}/orders`, {
             "method": "POST",
@@ -108,7 +108,9 @@ async function placeLimitOrder(exchange, symbol, side, limit_price, quantity) {
             throw "";
         }
         
-        await markPositionEntryBeSl(exchange, symbol, side, limit_price, quantity);
+        if (manageMarks) {
+            await managePositionMarks(exchange, symbol, side, limit_price, quantity);
+        }
 
         return fyers_id;
     } catch {
@@ -235,6 +237,16 @@ function computePositionSize(capital, exchange, side, price) {
     }
 }
 
+function roundToNearest(price, doCeil, tick_size) {
+    price = new Decimal(price);
+    tick_size = new Decimal(tick_size);
+    if (doCeil) {
+        return price.dividedBy(tick_size).ceil().times(tick_size).toNumber();
+    } else {
+        return price.dividedBy(tick_size).floor().times(tick_size).toNumber();
+    }
+}
+
 function showTvHl(lineId, price) {
     return new Promise((resolve, reject) => {
         const dynamicEvent = `Fyers_Web_Sk_${uuid.v4()}`;
@@ -281,4 +293,20 @@ function checkShapesExist(shapeIds) {
             "Fyers_Web_Sk_check_shapes_exist_request", {detail: {responseEvent: dynamicEvent, shapeIds: shapeIds}}
         ));
     })
+}
+
+function getLastCrossHair() {
+    return new Promise((resolve, reject) => {
+        const dynamicEvent = `Fyers_Web_Sk_${uuid.v4()}`;
+
+        function handleGetLastCrossHairResponse(event) {
+            document.removeEventListener(dynamicEvent, handleGetLastCrossHairResponse);
+            resolve(event.detail);
+        }
+
+        document.addEventListener(dynamicEvent, handleGetLastCrossHairResponse);
+        document.dispatchEvent(new CustomEvent(
+            "Fyers_Web_Sk_get_last_crosshair_request", {detail: {responseEvent: dynamicEvent}}
+        ));
+    });
 }

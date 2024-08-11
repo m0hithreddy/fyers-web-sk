@@ -44,6 +44,15 @@
         "buy-0.25x": {
             "description": "Buy/Square-Off with 0.25x Funds/Positions"
         },
+        "buy-1x-limit": {
+            "description": "Buy/Square-Off with 1x Funds/Positions at limit(cursor)"
+        },
+        "buy-0.5x-limit": {
+            "description": "Buy/Square-Off with 0.5x Funds/Positions at limit(cursor)"
+        },
+        "buy-0.25x-limit": {
+            "description": "Buy/Square-Off with 0.25x Funds/Positions at limit(cursor)"
+        },
         "sell-1x": {
             "suggested_key": "Alt+Shift+1",
             "description": "Sell/Square-Off with 1x Funds/Positions" 
@@ -54,6 +63,15 @@
         },
         "sell-0.25x": {
             "description": "Sell/Square-Off with 0.25x Funds/Positions"
+        },
+        "sell-1x-limit": {
+            "description": "Sell/Square-Off with 1x Funds/Positions at limit(cursor)"
+        },
+        "sell-0.5x-limit": {
+            "description": "Sell/Square-Off with 0.5x Funds/Positions at limit(cursor)"
+        },
+        "sell-0.25x-limit": {
+            "description": "Sell/Square-Off with 0.25x Funds/Positions at limit(cursor)"
         }
     },
     "manifest_version": 3
